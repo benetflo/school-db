@@ -11,3 +11,9 @@ def get_futurama_characters():
 
 	return character_data
 
+def get_futurama_episodes():
+	response = requests.get("https://distansakademin.github.io/api/futurama/episodes")
+
+	episodes_data = response.json()
+
+	return episodes_data

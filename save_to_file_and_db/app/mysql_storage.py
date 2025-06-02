@@ -7,16 +7,28 @@ def connect_to_mysql():
 	cursor = conn.cursor()
 	return conn, cursor
 
-def reset_table(cursor):
-	cursor.execute("DROP TABLE IF EXISTS characters")
-	cursor.execute("""
-	CREATE TABLE characters ( 
-		id INT PRIMARY KEY,
-		first_name VARCHAR(100),
-		last_name VARCHAR(100),
-		image_url TEXT
-	)
-	""")
+def reset_table(cursor, name):
+	cursor.execute(f"DROP TABLE IF EXISTS {name}")
+	if name == "characters":
+		cursor.execute(f"""
+		CREATE TABLE {name} ( 
+			id INT PRIMARY KEY,
+			first_name VARCHAR(100),
+			last_name VARCHAR(100),
+			image_url TEXT
+		)
+		""")
+	else:
+		cursor.execute(f"""
+		CREATE TABLE {name} (
+			id INTEGER PRIMARY KEY,
+			number TEXT,
+			title TEXT,
+			writers TEXT,
+			originalAirDate TEXT,
+			description TEXT
+		)
+		""")
 
 def insert_characters(character_data, conn, cursor):
 
@@ -32,11 +44,35 @@ def insert_characters(character_data, conn, cursor):
 	conn.commit()
 	print("Saved character data to MySQL.")
 
+def insert_episodes(data, conn, cursor):
 
-def store_characters_in_mysql(character_data):
+	for key in data:
+		cursor.execute("INSERT INTO episodes (id, number, title, writers, originalAirDate, description) VALUES (%s, %s, %s, %s, %s, %s)",
+			(
+				key["id"],
+				key["number"],
+				key["title"],
+				key["writers"],
+				key["originalAirDate"],
+				key["desc"],
+			),
+	)
+	conn.commit()
+	print("Saved episodes data to MySQL")
+
+def store_characters_in_mysql(data):
 	conn, cursor = connect_to_mysql()
-	reset_table(cursor)
-	insert_characters(character_data, conn, cursor)
+	reset_table(cursor, "characters")
+	insert_characters(data, conn, cursor)
 	cursor.close()
 	conn.close()
 	print("Closed MySQL connection.")
+
+
+def store_episodes_in_mysql(data):
+        conn, cursor = connect_to_mysql()
+        reset_table(cursor, "episodes")
+        insert_episodes(data, conn, cursor)
+        cursor.close()
+        conn.close()
+        print("Closed MySQL connection.")
